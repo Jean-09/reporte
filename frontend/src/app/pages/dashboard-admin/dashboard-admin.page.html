@@ -1,0 +1,169 @@
+<ion-header [translucent]="true">
+  <ion-toolbar color="primary">
+    <ion-title>Panel de Administración</ion-title>
+    <ion-buttons slot="end">
+      <ion-button (click)="logout()">
+        <ion-icon name="log-out"></ion-icon>
+        Salir
+      </ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content [fullscreen]="true" class="admin-content">
+  <!-- Header de Bienvenida -->
+  <div class="welcome-header">
+    <div class="user-info">
+
+      <img *ngIf="$any(usuario)?.avatar?.url" [src]="'http://localhost:1337' + $any(usuario).avatar.url" [alt]="usuario?.nombre" class="user-avatar"/>
+      <div class="user-details">
+        <h2>¡Bienvenido, {{ usuario?.nombre }}!</h2>
+        <p>{{ usuario?.departamento?.nombre }} - Administrador</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Estadísticas Rápidas -->
+  <div class="stats-container">
+    <h3 class="section-title">Resumen General</h3>
+    <ion-grid>
+      <ion-row>
+        <ion-col size="6" size-md="3">
+          <div class="stat-card total">
+            <div class="stat-icon">
+              <ion-icon name="document-text"></ion-icon>
+            </div>
+            <div class="stat-info">
+              <h4 style="color: black;">{{ estadisticas.totalReportes }}</h4>
+              <p>Total Reportes</p>
+            </div>
+          </div>
+        </ion-col>
+        <ion-col size="6" size-md="3">
+          <div class="stat-card pending">
+            <div class="stat-icon">
+              <ion-icon name="time"></ion-icon>
+            </div>
+            <div class="stat-info">
+              <h4 style="color: black;">{{ estadisticas.pendientes }}</h4>
+              <p>Pendientes</p>
+            </div>
+          </div>
+        </ion-col>
+        <ion-col size="6" size-md="3">
+          <div class="stat-card progress">
+            <div class="stat-icon">
+              <ion-icon name="construct"></ion-icon>
+            </div>
+            <div class="stat-info">
+              <h4 style="color: black;">{{ estadisticas.enProceso }}</h4>
+              <p>En Proceso</p>
+            </div>
+          </div>
+        </ion-col>
+        <ion-col size="6" size-md="3">
+          <div class="stat-card completed">
+            <div class="stat-icon">
+              <ion-icon name="checkmark-circle"></ion-icon>
+            </div>
+            <div class="stat-info">
+              <h4 style="color: black;">{{ estadisticas.cerrados }}</h4>
+              <p>Cerrados</p>
+            </div>
+          </div>
+        </ion-col>
+      </ion-row>
+    </ion-grid>
+  </div>
+
+  <!-- Acciones Rápidas -->
+  <div class="quick-actions">
+    <h3 class="section-title">Acciones Rápidas</h3>
+    <ion-grid>
+      <ion-row>
+        <ion-col size="12" size-md="6">
+          <ion-card class="action-card" (click)="navegarA('/reportes')">
+            <ion-card-content>
+              <div class="action-content">
+                <ion-icon name="list" class="action-icon"></ion-icon>
+                <div class="action-text">
+                  <h4 style="color: black;">Ver Todos los Reportes</h4>
+                  <p>Gestionar y revisar reportes</p>
+                </div>
+                <ion-icon name="chevron-forward" class="action-arrow"></ion-icon>
+              </div>
+            </ion-card-content>
+          </ion-card>
+        </ion-col>
+        <ion-col size="12" size-md="6">
+          <ion-card class="action-card" (click)="navegarA('/gestion-tecnicos')">
+            <ion-card-content>
+              <div class="action-content">
+                <ion-icon name="people" class="action-icon"></ion-icon>
+                <div class="action-text">
+                  <h4 style="color: black;">Gestión de Técnicos</h4>
+                  <p>Administrar técnicos y asignaciones</p>
+                </div>
+                <ion-icon name="chevron-forward" class="action-arrow"></ion-icon>
+              </div>
+            </ion-card-content>
+          </ion-card>
+        </ion-col>
+        <ion-col size="12" size-md="6">
+          <ion-card class="action-card" (click)="navegarA('/gestion-usuarios')">
+            <ion-card-content>
+              <div class="action-content">
+                <ion-icon name="person-add" class="action-icon"></ion-icon>
+                <div class="action-text">
+                  <h4 style="color: black;">Gestión de Usuarios</h4>
+                  <p>Crear cuentas para docentes y técnicos</p>
+                </div>
+                <ion-icon name="chevron-forward" class="action-arrow"></ion-icon>
+              </div>
+            </ion-card-content>
+          </ion-card>
+        </ion-col>
+        <ion-col size="12" size-md="6">
+          <ion-card class="action-card" (click)="navegarA('/crear-reporte')">
+            <ion-card-content>
+              <div class="action-content">
+                <ion-icon name="add-circle" class="action-icon"></ion-icon>
+                <div class="action-text">
+                  <h4 style="color: black;">Crear Nuevo Reporte</h4>
+                  <p>Registrar un nuevo incidente</p>
+                </div>
+                <ion-icon name="chevron-forward" class="action-arrow"></ion-icon>
+              </div>
+            </ion-card-content>
+          </ion-card>
+        </ion-col>
+      </ion-row>
+    </ion-grid>
+  </div>
+
+  <!-- Reportes Recientes -->
+  <div class="recent-reports">
+    <h3 class="section-title">Reportes Recientes</h3>
+    <ion-card *ngFor="let reporte of reportes.slice(0, 5)" class="report-card">
+      <ion-card-content>
+        <div class="report-header">
+          <div class="report-info">
+            <h4 style="color: black;">Reporte #{{ reporte.numeroReporte }}</h4>
+            <p>{{ reporte.usuario.username }} - {{ reporte.edificio.nombre }}</p>
+          </div>
+          <ion-chip [color]="getEstadoColor(reporte.estado)" class="status-chip">
+            {{ getEstadoTexto(reporte.estado) }}
+          </ion-chip>
+        </div>
+        <p class="report-description" style="color: black;">{{ reporte.descripcionDetallada | slice:0:100 }}...</p>
+        <div class="report-footer">
+          <span class="report-date">{{ formatearFecha(reporte.fechaIncidente) }}</span>
+          <ion-button fill="clear" size="small" (click)="verDetallesRepo(reporte)">
+            Ver Detalle
+            <ion-icon name="arrow-forward" slot="end" ></ion-icon>
+          </ion-button>
+        </div>
+      </ion-card-content>
+    </ion-card>
+  </div>
+</ion-content>

@@ -1,0 +1,170 @@
+<ion-header [translucent]="true">
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-back-button defaultHref="/reportes" text="Volver"></ion-back-button>
+    </ion-buttons>
+    <ion-title>Gestión de Técnicos</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content [fullscreen]="true">
+  <ion-header collapse="condense">
+    <ion-toolbar>
+      <ion-title size="large">Gestión de Técnicos</ion-title>
+    </ion-toolbar>
+  </ion-header>
+
+  <!-- Información del Técnico -->
+  <ion-card>
+    <ion-card-content>
+      <div style="text-align: center;">
+        <ion-icon name="person-circle" style="font-size: 48px; color: var(--ion-color-primary);"></ion-icon>
+        <h2>{{ tecnicoActual }}</h2>
+        <p>Técnico de Soporte</p>
+      </div>
+    </ion-card-content>
+  </ion-card>
+
+  <!-- Reportes Pendientes -->
+  <ion-card>
+    <ion-card-header>
+      <ion-card-title>
+        <ion-icon name="time"></ion-icon>
+        Reportes Pendientes ({{ reportesPendientes.length }})
+      </ion-card-title>
+      <ion-card-subtitle>Reportes esperando ser aceptados</ion-card-subtitle>
+    </ion-card-header>
+    <ion-card-content>
+      <div *ngFor="let reporte of reportesPendientes" class="reporte-item">
+        <ion-item>
+          <div slot="start" class="prioridad-indicator">
+            <ion-chip [color]="getPrioridadColor(getPrioridad(reporte.fechaCreacion))" size="small">
+              {{ getPrioridad(reporte.fechaCreacion).toUpperCase() }}
+            </ion-chip>
+            <p style="font-size: 12px; margin: 2px 0;">{{ getTiempoTranscurrido(reporte.fechaCreacion) }}</p>
+          </div>
+          
+          <ion-label>
+            <h3>Reporte #{{ reporte.id }}</h3>
+            <p><strong>Usuario:</strong> {{ reporte.nombreUsuario }}</p>
+            <p><strong>Departamento:</strong> {{ reporte.edificio }}</p>
+            <p><strong>Tipo:</strong> {{ reporte.tipoProblema }}</p>
+            <p><strong>Descripción:</strong> {{ reporte.descripcionDetallada | slice:0:80 }}...</p>
+            <p><strong>Fecha:</strong> {{ formatearFecha(reporte.fechaCreacion) }}</p>
+          </ion-label>
+
+          <div slot="end" class="acciones-botones">
+            <ion-button 
+              fill="solid" 
+              color="success" 
+              size="small"
+              (click)="aceptarReporte(reporte)">
+              <ion-icon name="checkmark" slot="icon-only"></ion-icon>
+            </ion-button>
+            <ion-button 
+              fill="solid" 
+              color="danger" 
+              size="small"
+              (click)="rechazarReporte(reporte)">
+              <ion-icon name="close" slot="icon-only"></ion-icon>
+            </ion-button>
+          </div>
+        </ion-item>
+      </div>
+
+      <div *ngIf="reportesPendientes.length === 0" class="mensaje-vacio">
+        <ion-icon name="checkmark-circle" style="font-size: 64px; color: #ccc;"></ion-icon>
+        <h3>No hay reportes pendientes</h3>
+        <p>Todos los reportes han sido procesados.</p>
+      </div>
+    </ion-card-content>
+  </ion-card>
+
+  <!-- Reportes Aceptados -->
+  <ion-card>
+    <ion-card-header>
+      <ion-card-title>
+        <ion-icon name="construct"></ion-icon>
+        Mis Reportes Aceptados ({{ reportesAceptados.length }})
+      </ion-card-title>
+      <ion-card-subtitle>Reportes que ha aceptado para trabajar</ion-card-subtitle>
+    </ion-card-header>
+    <ion-card-content>
+      <div *ngFor="let reporte of reportesAceptados" class="reporte-item">
+        <ion-item [routerLink]="['/detalle-reporte', reporte.id]">
+          <div slot="start" class="estado-indicator">
+            <ion-chip 
+              [color]="reporte.estado === 'aceptado' ? 'primary' : 'warning'" 
+              size="small">
+              {{ reporte.estado === 'aceptado' ? 'ACEPTADO' : 'EN PROCESO' }}
+            </ion-chip>
+          </div>
+          
+          <ion-label>
+            <h3>Reporte #{{ reporte.id }}</h3>
+            <p><strong>Usuario:</strong> {{ reporte.nombreUsuario }}</p>
+            <p><strong>Departamento:</strong> {{ reporte.edificio }}</p>
+            <p><strong>Tipo:</strong> {{ reporte.tipoProblema }}</p>
+            <p><strong>Aceptado:</strong> {{ formatearFecha(reporte.fechaAceptacion!) }}</p>
+          </ion-label>
+
+          <ion-icon name="chevron-forward" slot="end"></ion-icon>
+        </ion-item>
+      </div>
+
+      <div *ngIf="reportesAceptados.length === 0" class="mensaje-vacio">
+        <ion-icon name="folder-open" style="font-size: 64px; color: #ccc;"></ion-icon>
+        <h3>No tiene reportes aceptados</h3>
+        <p>Acepte reportes de la cola para comenzar a trabajar.</p>
+      </div>
+    </ion-card-content>
+  </ion-card>
+
+  <!-- Estadísticas Rápidas -->
+  <ion-card>
+    <ion-card-header>
+      <ion-card-title>
+        <ion-icon name="analytics"></ion-icon>
+        Estadísticas del Día
+      </ion-card-title>
+    </ion-card-header>
+    <ion-card-content>
+      <ion-grid>
+        <ion-row>
+          <ion-col size="6">
+            <div class="stat-item">
+              <h2>{{ reportesPendientes.length }}</h2>
+              <p>Pendientes</p>
+            </div>
+          </ion-col>
+          <ion-col size="6">
+            <div class="stat-item">
+              <h2>{{ reportesAceptados.length }}</h2>
+              <p>Aceptados</p>
+            </div>
+          </ion-col>
+        </ion-row>
+      </ion-grid>
+    </ion-card-content>
+  </ion-card>
+
+  <!-- Información para Técnicos -->
+  <ion-card>
+    <ion-card-header>
+      <ion-card-title color="primary">
+        <ion-icon name="information-circle"></ion-icon>
+        Instrucciones para Técnicos
+      </ion-card-title>
+    </ion-card-header>
+    <ion-card-content>
+      <ul>
+        <li><strong>Prioridad Alta:</strong> Reportes con más de 24 horas</li>
+        <li><strong>Prioridad Media:</strong> Reportes entre 8-24 horas</li>
+        <li><strong>Prioridad Baja:</strong> Reportes recientes (menos de 8 horas)</li>
+        <li>Use el botón ✓ para aceptar reportes</li>
+        <li>Use el botón ✗ para rechazar si no puede atenderlos</li>
+        <li>Una vez aceptado, acceda al detalle para gestionar el reporte</li>
+      </ul>
+    </ion-card-content>
+  </ion-card>
+</ion-content>

@@ -1,0 +1,46 @@
+{
+    "kind": "collectionType",
+    "collectionName": "edificios",
+    "info": {
+        "singularName": "edificio",
+        "pluralName": "edificios",
+        "displayName": "edificio"
+    },
+    "options": {
+        "draftAndPublish": true
+    },
+    "pluginOptions": {},
+    "attributes": {
+        "nombre": {
+            "type": "text",
+            "maxLength": 100
+        },
+        "codigo": {
+            "type": "string",
+            "maxLength": 10
+        },
+        "descripcion": {
+            "type": "text"
+        },
+        "especialidad": {
+            "type": "string",
+            "maxLength": 100
+        },
+        "activo": {
+            "type": "boolean",
+            "default": true
+        },
+        "reportes": {
+            "type": "relation",
+            "relation": "oneToMany",
+            "target": "api::reporte.reporte",
+            "mappedBy": "edificio"
+        },
+        "user": {
+            "type": "relation",
+            "relation": "oneToOne",
+            "target": "plugin::users-permissions.user",
+            "inversedBy": "edificio"
+        }
+    }
+}

@@ -1,0 +1,100 @@
+{
+  "kind": "collectionType",
+  "collectionName": "reportes",
+  "info": {
+    "singularName": "reporte",
+    "pluralName": "reportes",
+    "displayName": "reporte"
+  },
+  "options": {
+    "draftAndPublish": true
+  },
+  "pluginOptions": {},
+  "attributes": {
+    "edificio": {
+      "type": "relation",
+      "relation": "manyToOne",
+      "target": "api::edificio.edificio",
+      "inversedBy": "reportes"
+    },
+    "numeroReporte": {
+      "type": "string",
+      "maxLength": 10
+    },
+    "emailUsuario": {
+      "type": "email"
+    },
+    "aula": {
+      "type": "string",
+      "maxLength": 50
+    },
+    "fechaIncidente": {
+      "type": "datetime",
+      "required": true
+    },
+    "tipoProblema": {
+      "type": "text"
+    },
+    "descripcionDetallada": {
+      "type": "text",
+      "required": true
+    },
+    "equipoAfectado": {
+      "type": "string",
+      "required": true
+    },
+    "estado": {
+      "type": "enumeration",
+      "required": true,
+      "default": "pendiente",
+      "enum": [
+        "pendiente",
+        "aceptado",
+        "en_proceso",
+        "resuelto",
+        "cerrado"
+      ]
+    },
+    "tecnicoAsignado": {
+      "type": "string",
+      "maxLength": 100
+    },
+    "rectorEdificio": {
+      "type": "string",
+      "maxLength": 100
+    },
+    "fechaAceptacion": {
+      "type": "datetime"
+    },
+    "fechaResolucion": {
+      "type": "datetime"
+    },
+    "solucionAplicada": {
+      "type": "text"
+    },
+    "observacionesTecnico": {
+      "type": "text"
+    },
+    "archivosAdjuntos": {
+      "type": "media",
+      "multiple": true,
+      "required": true,
+      "allowedTypes": [
+        "images",
+        "files"
+      ]
+    },
+    "usuario": {
+      "type": "relation",
+      "relation": "manyToOne",
+      "target": "plugin::users-permissions.user",
+      "inversedBy": "reportes"
+    },
+    "historial_acciones": {
+      "type": "relation",
+      "relation": "oneToMany",
+      "target": "api::historial-accione.historial-accione",
+      "mappedBy": "reporte"
+    }
+  }
+}

@@ -1,0 +1,101 @@
+<ion-content class="login-content">
+  <div class="login-container">
+    <!-- Logo y Header -->
+    <div class="login-header">
+      <div class="logo-container">
+        <ion-icon name="construct" class="logo-icon"></ion-icon>
+      </div>
+      <h1 class="app-title">Sistema de Soporte</h1>
+      <p class="app-subtitle">Gestión de Reportes Técnicos</p>
+    </div>
+
+    <!-- Formulario de Login -->
+    <ion-card class="login-card">
+      <ion-card-content>
+        <form #loginForm="ngForm">
+          <div class="form-group">
+            <ion-item class="login-item">
+              <ion-label position="stacked" style="color: black;">Correo Electrónico</ion-label>
+              <ion-input style="color: black;"
+                [(ngModel)]="identifier"
+                name="email"
+                type="email"
+                placeholder="usuario@empresa.com"
+                required
+                autocomplete="email">
+                <ion-icon name="mail" slot="start" class="input-icon"></ion-icon>
+              </ion-input>
+            </ion-item>
+          </div>
+
+          <div class="form-group">
+            <ion-item class="login-item">
+              <ion-label position="stacked" style="color: black;">Contraseña</ion-label>
+              <ion-input style="color: black;"
+                [(ngModel)]="identifier"
+                name="password"
+                [type]="showPassword ? 'text' : 'password'"
+                placeholder="Ingrese su contraseña"
+                required
+                autocomplete="current-password">
+                <ion-icon name="lock-closed" slot="start" class="input-icon"></ion-icon>
+                <ion-button 
+                  fill="clear" 
+                  slot="end" 
+                  (click)="togglePasswordVisibility()"
+                  class="password-toggle">
+                  <ion-icon [name]="showPassword ? 'eye-off' : 'eye'"></ion-icon>
+                </ion-button>
+              </ion-input>
+            </ion-item>
+          </div>
+
+          <div class="login-actions">
+            <ion-button
+              expand="block"
+              size="large"
+              (click)="onLogin()"
+              [disabled]="!loginForm.form.valid || isLoading"
+              class="login-button">
+              <ion-icon name="log-in" slot="start" *ngIf="!isLoading"></ion-icon>
+              <ion-spinner name="crescent" *ngIf="isLoading"></ion-spinner>
+              {{ isLoading ? 'Iniciando sesión...' : 'Iniciar Sesión' }}
+            </ion-button>
+          </div>
+        </form>
+      </ion-card-content>
+    </ion-card>
+
+    <!-- Usuarios Demo -->
+    <ion-card class="demo-card">
+      <ion-card-header>
+        <ion-card-title class="demo-title">
+          <ion-icon name="information-circle"></ion-icon>
+          Usuarios de Prueba
+        </ion-card-title>
+        <ion-card-subtitle>Haga clic para usar credenciales de demostración</ion-card-subtitle>
+      </ion-card-header>
+      <ion-card-content>
+        <div class="demo-users">
+          <div 
+            *ngFor="let usuario of usuariosDemo" 
+            class="demo-user"
+            (click)="usarCredencialesDemo(usuario)">
+            <div class="demo-user-info">
+              <h4>{{ usuario.rol }}</h4>
+              <p>{{ usuario.email }}</p>
+              <span class="demo-password">Contraseña: {{ usuario.password }}</span>
+            </div>
+            <ion-icon name="chevron-forward" class="demo-arrow"></ion-icon>
+          </div>
+        </div>
+      </ion-card-content>
+    </ion-card>
+
+    <!-- Footer -->
+    <div class="login-footer">
+      <p>&copy; 2025 Sistema de Soporte Técnico</p>
+      <p>Versión 1.0.0</p>
+    </div>
+  </div>
+</ion-content>

@@ -1,0 +1,51 @@
+{
+    "kind": "collectionType",
+    "collectionName": "historial_acciones",
+    "info": {
+        "singularName": "historial-accione",
+        "pluralName": "historial-acciones",
+        "displayName": "historial-accione"
+    },
+    "options": {
+        "draftAndPublish": true
+    },
+    "pluginOptions": {},
+    "attributes": {
+        "accion": {
+            "type": "enumeration",
+            "required": true,
+            "enum": [
+                "creacion",
+                "aceptacion",
+                "inicio_trabajo",
+                "resolucion",
+                "cierre"
+            ]
+        },
+        "usuario": {
+            "type": "string",
+            "maxLength": 100,
+            "required": true
+        },
+        "descripcion": {
+            "type": "text",
+            "required": true
+        },
+        "fechaAccion": {
+            "type": "datetime",
+            "required": true
+        },
+        "user": {
+            "type": "relation",
+            "relation": "manyToOne",
+            "target": "plugin::users-permissions.user",
+            "inversedBy": "historial_acciones"
+        },
+        "reporte": {
+            "type": "relation",
+            "relation": "manyToOne",
+            "target": "api::reporte.reporte",
+            "inversedBy": "historial_acciones"
+        }
+    }
+}

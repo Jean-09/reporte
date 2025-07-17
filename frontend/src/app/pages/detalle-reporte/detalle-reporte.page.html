@@ -1,0 +1,230 @@
+<ion-header [translucent]="true">
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-back-button></ion-back-button>
+    </ion-buttons>
+    <ion-title>Reporte #{{ reporte.numeroReporte}}</ion-title>
+    <ion-buttons slot="end">
+      <ion-button *ngIf="puedeImprimir()" (click)="imprimirReporte()">
+        <ion-icon name="print" style="color: black;"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content [fullscreen]="true" *ngIf="reporte">
+  <ion-header collapse="condense">
+    <ion-toolbar>
+      <ion-title size="large">Reporte #{{ reporte.numeroReporte }}</ion-title>
+    </ion-toolbar>
+  </ion-header>
+
+  <!-- Estado del Reporte -->
+  <ion-card>
+    <ion-card-content>
+      <div style="text-align: center;">
+        <ion-chip [color]="getEstadoColor(reporte.estado)" style="font-size: 16px; padding: 8px 16px;">
+          <ion-icon name="information-circle" slot="start"></ion-icon>
+          {{ getEstadoTexto(reporte.estado) }}
+        </ion-chip>
+      </div>
+    </ion-card-content>
+  </ion-card>
+  <!-- Modal -->
+          <div class="modal-imagen" *ngIf="imagenSeleccionada" (click)="cerrarImagen()">
+            <img [src]="imagenSeleccionada" class="imagen-grande" />
+          </div>
+  <!-- Información del Usuario -->
+  <ion-card>
+    
+    <ion-card-header>
+      <ion-card-title>
+        <ion-icon name="person"></ion-icon>
+        Información del Usuario
+      </ion-card-title>
+    </ion-card-header>
+    <ion-card-content>
+      <ion-item>
+        <ion-label>
+          <h3>Nombre</h3>
+          <p>{{ reporte.usuario.nombre }}</p>
+        </ion-label>
+      </ion-item>
+      <ion-item>
+        <ion-label>
+          <h3>Edificio</h3>
+          <p>{{ reporte.edificio.nombre }}</p>
+        </ion-label>
+      </ion-item>
+      <ion-item>
+        <ion-label>
+          <h3>Fecha del Incidente</h3>
+          <p>{{ formatearFecha(reporte.fechaIncidente) }}</p>
+        </ion-label>
+      </ion-item>
+    </ion-card-content>
+  </ion-card>
+
+  <!-- Detalles del Problema -->
+  <ion-card>
+    <ion-card-header>
+      <ion-card-title>
+        <ion-icon name="bug"></ion-icon>
+        Detalles del Problema
+      </ion-card-title>
+    </ion-card-header>
+    <ion-card-content>
+      <ion-item>
+        <ion-label>
+          <h3>Tipo de Problema</h3>
+          <p>{{ reporte.tipoProblema }}</p>
+        </ion-label>
+      </ion-item>
+      <ion-item>
+        <ion-label>
+          <h3>Descripción Detallada</h3>
+          <p>{{ reporte.descripcionDetallada }}</p>
+        </ion-label>
+      </ion-item>
+      <ion-item *ngIf="reporte.archivosAdjuntos">
+        <ion-label>
+          <h3>Archivo Adjunto</h3>
+          <div class="imagenes-container">
+            <img *ngFor="let a of reporte.archivosAdjuntos" [src]="'http://localhost:1337' + a.url"
+              class="imagen-miniatura" (click)="mostrarImagen(a)" alt="adjunto" />
+          </div>
+
+          
+
+        </ion-label>
+      </ion-item>
+    </ion-card-content>
+  </ion-card>
+
+  <!-- Información del Técnico (si está asignado) -->
+  <ion-card *ngIf="reporte.tecnicoAsignado">
+    <ion-card-header>
+      <ion-card-title>
+        <ion-icon name="construct"></ion-icon>
+        Información del Técnico
+      </ion-card-title>
+    </ion-card-header>
+    <ion-card-content>
+      <ion-item>
+        <ion-label>
+          <h3>Técnico Asignado</h3>
+          <p>{{ reporte.tecnicoAsignado }}</p>
+        </ion-label>
+      </ion-item>
+      <ion-item *ngIf="reporte.fechaAceptacion">
+        <ion-label>
+          <h3>Fecha de Aceptación</h3>
+          <p>{{ formatearFecha(reporte.fechaAceptacion) }}</p>
+        </ion-label>
+      </ion-item>
+      <ion-item *ngIf="reporte.solucionAplicada">
+        <ion-label>
+          <h3>Solución Aplicada</h3>
+          <p>{{ reporte.solucionAplicada }}</p>
+        </ion-label>
+      </ion-item>
+      <ion-item *ngIf="reporte.fechaResolucion">
+        <ion-label>
+          <h3>Fecha de Resolución</h3>
+          <p>{{ formatearFecha(reporte.fechaResolucion) }}</p>
+        </ion-label>
+      </ion-item>
+    </ion-card-content>
+  </ion-card>
+
+  <!-- Firma del Usuario (si existe) -->
+
+  <!-- Historial de Acciones -->
+  <ion-card>
+    <ion-card-header>
+      <ion-card-title>
+        <ion-icon name="time"></ion-icon>
+        Historial de Acciones
+      </ion-card-title>
+    </ion-card-header>
+    <ion-card-content>
+      <div *ngFor="let accion of reporte.historial_acciones" class="historial-item">
+        <ion-item>
+          <ion-label>
+            <h3>{{ accion.accion }}</h3>
+            <p><strong>Usuario:</strong> {{ accion.usuario }}</p>
+            <p><strong>Fecha:</strong> {{ formatearFecha(accion.fecha) }}</p>
+            <p *ngIf="accion.descripcion">{{ accion.descripcion }}</p>
+          </ion-label>
+        </ion-item>
+      </div>
+    </ion-card-content>
+  </ion-card>
+
+  <!-- Acciones del Técnico -->
+  <ion-card *ngIf="esTecnico">
+    <ion-card-header>
+      <ion-card-title>
+        <ion-icon name="settings"></ion-icon>
+        Acciones del Técnico
+      </ion-card-title>
+    </ion-card-header>
+    <ion-card-content>
+      <ion-button *ngIf="puedeAceptar()" expand="block" color="primary" (click)="aceptarReporte()">
+        <ion-icon name="checkmark" slot="start"></ion-icon>
+        Aceptar Reporte
+      </ion-button>
+
+      <ion-button *ngIf="puedeMarcarEnProceso()" expand="block" color="warning" (click)="marcarEnProceso()">
+        <ion-icon name="construct" slot="start"></ion-icon>
+        Marcar En Proceso
+      </ion-button>
+
+      <ion-button *ngIf="puedeMarcarResuelto()" expand="block" color="success" (click)="marcarResuelto()">
+        <ion-icon name="checkmark-done" slot="start"></ion-icon>
+        Marcar como Resuelto
+      </ion-button>
+    </ion-card-content>
+  </ion-card>
+
+  <!-- Acciones del Usuario -->
+  <ion-card *ngIf="!esTecnico">
+    <ion-card-header>
+      <ion-card-title>
+        <ion-icon name="person"></ion-icon>
+        Acciones del Usuario
+      </ion-card-title>
+    </ion-card-header>
+    <ion-card-content>
+      <ion-button *ngIf="puedeFirmar()" expand="block" color="success" (click)="firmarConformidad()">
+        <ion-icon name="create" slot="start"></ion-icon>
+        Firmar Conformidad
+      </ion-button>
+
+      <ion-button *ngIf="puedeImprimir()" expand="block" color="secondary" (click)="imprimirReporte()">
+        <ion-icon name="print" slot="start"></ion-icon>
+        Imprimir Reporte
+      </ion-button>
+    </ion-card-content>
+  </ion-card>
+
+  <!-- Información adicional -->
+  <ion-card>
+    <ion-card-header>
+      <ion-card-title color="primary">
+        <ion-icon name="information-circle"></ion-icon>
+        Información del Proceso
+      </ion-card-title>
+    </ion-card-header>
+    <ion-card-content>
+      <ul>
+        <li><strong>Fecha de Creación:</strong> {{ formatearFecha(reporte.createdAt) }}</li>
+        <li *ngIf="reporte.estado === 'pendiente'">Su reporte está en espera de ser aceptado por un técnico</li>
+        <li *ngIf="reporte.estado === 'aceptado'">Un técnico ha aceptado su reporte y comenzará a trabajar en él</li>
+        <li *ngIf="reporte.estado === 'en_proceso'">El técnico está trabajando en la solución</li>
+        <li *ngIf="reporte.estado === 'resuelto'">El problema ha sido resuelto, por favor confirme la solución</li>
+        <li *ngIf="reporte.estado === 'cerrado'">El reporte ha sido cerrado satisfactoriamente</li>
+      </ul>
+    </ion-card-content>
+  </ion-card>
+</ion-content>

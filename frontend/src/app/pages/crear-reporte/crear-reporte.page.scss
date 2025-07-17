@@ -1,0 +1,104 @@
+.custom-form {
+  --padding-start: 16px;
+  --padding-end: 16px;
+}
+
+ion-card {
+  margin-bottom: 16px;
+}
+
+ion-item {
+  --border-color: transparent;
+  --inner-border-width: 0;
+  margin-bottom: 8px;
+}
+
+ion-textarea {
+  --padding-start: 0;
+  --padding-end: 0;
+}
+
+ion-button {
+  margin: 8px 0;
+}
+
+ion-note {
+  font-size: 12px;
+  margin-top: 5px;
+}
+
+input[type="file"] {
+  width: 100%;
+  padding: 10px;
+  border: 1px dashed #ccc;
+  border-radius: 4px;
+  background-color: #f9f9f9;
+}
+
+ul {
+  margin: 0;
+  padding-left: 20px;
+}
+
+li {
+  margin-bottom: 8px;
+  color: #666;
+}
+
+.imagenes-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.imagen-miniatura {
+  width: 100px;
+  height: 100px;
+  object-fit: cover;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: transform 0.2s;
+}
+
+.imagen-miniatura:hover {
+  transform: scale(1.05);
+}
+
+.modal-imagen {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(0, 0, 0, 0.8);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.imagen-grande {
+  max-width: 90%;
+  max-height: 90%;
+  border-radius: 10px;
+}
+
+.preview-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+.preview-item {
+  position: relative;
+}
+.preview-img {
+  width: 100px;
+  height: 100px;
+  object-fit: cover;
+}
+.preview-item button {
+  position: absolute;
+  top: 0;
+  right: 0;
+}
+

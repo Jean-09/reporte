@@ -1,0 +1,140 @@
+<ion-header [translucent]="true">
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-back-button defaultHref="/reportes" text="Volver"></ion-back-button>
+    </ion-buttons>
+    <ion-title>Nuevo Reporte de Soporte</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content [fullscreen]="true" class="custom-form">
+  <ion-header collapse="condense">
+    <ion-toolbar>
+      <ion-title size="large">Nuevo Reporte</ion-title>
+    </ion-toolbar>
+  </ion-header>
+
+  <form #reporteForm="ngForm">
+    <ion-card>
+      <ion-card-header>
+        <ion-card-title>Información del Usuario</ion-card-title>
+      </ion-card-header>
+      <ion-card-content>
+        <ion-item>
+          <ion-label position="stacked">Nombre del Usuario *</ion-label>
+          <ion-text name="nombreUsuario" placeholder="Ingrese su nombre completo">
+            {{usuario?.nombre}}
+          </ion-text>
+        </ion-item>
+
+        <ion-item>
+          <ion-label position="stacked">Edificio *</ion-label>
+          <ion-select [(ngModel)]="reporte.edificio" name="edificio" placeholder="Seleccione el edificio" required>
+            <ion-select-option *ngFor="let e of edificios" [value]="e.documentId">
+              {{ e.nombre }}
+            </ion-select-option>
+          </ion-select>
+        </ion-item>
+
+        <ion-item>
+          <ion-label position="stacked">Aula o Ubicación Específica</ion-label>
+          <ion-input [(ngModel)]="reporte.aula" name="aula" placeholder="Ej: Aula 301, Laboratorio 205, etc.">
+          </ion-input>
+        </ion-item>
+      </ion-card-content>
+    </ion-card>
+
+    <ion-card>
+      <ion-card-header>
+        <ion-card-title>Detalles del Incidente</ion-card-title>
+      </ion-card-header>
+      <ion-card-content>
+        <ion-item lines="none">
+          <ion-label position="stacked">Fecha y Hora del Incidente *</ion-label>
+          <div>{{ reporte.fechaIncidente | date: 'dd/MM/yyyy HH:mm' }}</div>
+        </ion-item>
+
+
+        <ion-item>
+          <ion-label position="stacked">Tipo de Problema *</ion-label>
+          <ion-textarea [(ngModel)]="reporte.tipoProblema" name="tipoProblema"
+            placeholder="tipo de problema" required>
+          </ion-textarea>
+        </ion-item>
+
+        <ion-item>
+          <ion-label position="stacked">Descripción Detallada del Problema *</ion-label>
+          <ion-textarea [(ngModel)]="reporte.descripcionDetallada" name="descripcionDetallada"
+            placeholder="Describa el problema de manera detallada: ¿Qué pasó? ¿Cuándo? ¿Qué estaba haciendo cuando ocurrió?"
+            rows="6" required>
+          </ion-textarea>
+        </ion-item>
+
+        <ion-item>
+          <ion-label position="stacked">Equipo Afectado (Opcional)</ion-label>
+          <ion-input [(ngModel)]="reporte.equipoAfectado" name="equipoAfectado"
+            placeholder="Ej: Proyector Epson, Computadora Dell, etc.">
+          </ion-input>
+        </ion-item>
+
+        <ion-item>
+          <ion-label position="stacked">Adjuntar Archivo (Opcional)</ion-label>
+          <input type="file" (change)="seleccionarFoto($event)" accept="image/*,.pdf,.txt" style="margin-top: 10px;"
+            multiple>
+          <ion-note color="medium">
+            Formatos permitidos: JPG, PNG, GIF, PDF, TXT (Máximo 5MB)
+          </ion-note>
+          <div *ngIf="previewImage && previewImage.length > 0" class="imagenes-container">
+            <div *ngFor="let imagen of previewImage; let i = index" class="preview-item">
+              <img [src]="imagen" alt="Imagen subida" class="imagen-miniatura" />
+              <button type="button" (click)="eliminarImagen(i)"><ion-icon name="close"></ion-icon></button>
+            </div>
+          </div>
+
+
+        </ion-item>
+
+        <ion-item *ngIf="archivoSeleccionado">
+          <ion-label>
+            <h3>Archivo Seleccionado:</h3>
+            <p>{{ archivoSeleccionado.name }}</p>
+            <p>Tamaño: {{ (archivoSeleccionado.size / 1024 / 1024).toFixed(2) }} MB</p>
+          </ion-label>
+        </ion-item>
+      </ion-card-content>
+    </ion-card>
+
+    <ion-card>
+      <ion-card-content>
+        <ion-button expand="block" color="primary" size="large" (click)="enviarReporte()"
+          [disabled]="!reporteForm.form.valid">
+          <ion-icon name="send" slot="start"></ion-icon>
+          Enviar Reporte
+        </ion-button>
+
+        <ion-button expand="block" fill="outline" color="medium" size="large" (click)="limpiarFormulario()">
+          <ion-icon name="refresh" slot="start"></ion-icon>
+          Limpiar Formulario
+        </ion-button>
+      </ion-card-content>
+    </ion-card>
+  </form>
+
+  <!-- Información adicional -->
+  <ion-card>
+    <ion-card-header>
+      <ion-card-title color="primary">
+        <ion-icon name="information-circle"></ion-icon>
+        Información Importante
+      </ion-card-title>
+    </ion-card-header>
+    <ion-card-content>
+      <ul>
+        <li>Su reporte será revisado por el equipo de soporte técnico</li>
+        <li>Recibirá una notificación cuando un técnico acepte su reporte</li>
+        <li>Puede seguir el estado de su reporte en la lista principal</li>
+        <li>Una vez resuelto, deberá firmar la conformidad de la solución</li>
+      </ul>
+    </ion-card-content>
+  </ion-card>
+</ion-content>
