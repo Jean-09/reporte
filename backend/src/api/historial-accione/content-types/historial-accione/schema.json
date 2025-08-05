@@ -23,7 +23,7 @@
       ]
     },
     "usuario": {
-      "type": "string",
+      "type": "text",
       "maxLength": 100,
       "required": true
     },

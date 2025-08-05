@@ -1,7 +1,8 @@
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { AlertController, ToastController, ModalController } from '@ionic/angular';
-import { Reporte, EstadoReporte, HistorialAccion } from '../../models/reporte.model';
+import { Storage } from '@ionic/storage-angular';
+import { ApiService } from 'src/app/service/api.service';
 
 @Component({
   selector: 'app-detalle-reporte',
@@ -15,6 +16,7 @@ export class DetalleReportePage implements OnInit {
   esTecnico: boolean = true; // Simulamos rol de técnico
   solucionAplicada: string = '';
   firmaUsuario: string = '';
+  esUsuario: boolean = true;
 
   imagenSeleccionada: string | null = null;
 
@@ -31,11 +33,47 @@ cerrarImagen() {
     private router: Router,
     private alertController: AlertController,
     private toastController: ToastController,
-    private modalController: ModalController
+    private modalController: ModalController,
+    private storage: Storage,
+    private api: ApiService
   ) { }
+
+  usuario:any;
 
   async ngOnInit() {
     await this.cargarReporte();
+    await this.storage.create()
+    await this.getToken();
+    
+    const response = await this.storage.get('token');
+
+    if (response) {
+      this.usuario = response.user;
+      console.log
+      if (this.usuario.role.name == 'Authenticated'){
+        this.esUsuario == true
+      }
+    } else {
+      console.warn('No hay datos guardados en el storage.');
+    }
+    console.log('este es el usuario', this.usuario)
+
+
+  }
+
+
+  token = '';
+
+  async getToken() {
+    const tokenData = await this.storage.get('token');
+    console.log('este es el data del token', tokenData)
+    if (tokenData?.token && tokenData?.user) {
+      this.token = tokenData.token;
+      console.log('token:', this.token);
+    } else {
+      // Si falta alguno, redirigimos al login
+      this.router.navigate(['/login']);
+    }
   }
 
   async cargarReporte() {
@@ -46,18 +84,10 @@ cerrarImagen() {
     }
   }
 
-  async aceptarReporte() {
+    async aceptarReporte(reporte: any) {
     const alert = await this.alertController.create({
       header: 'Aceptar Reporte',
-      message: '¿Está seguro que desea aceptar este reporte?',
-      inputs: [
-        {
-          name: 'nombreTecnico',
-          type: 'text',
-          placeholder: 'Ingrese su nombre',
-          value: 'Carlos Técnico'
-        }
-      ],
+      message: `¿Desea aceptar el reporte #${reporte.numeroReporte} de ${reporte.usuario.nombre}?`,
       buttons: [
         {
           text: 'Cancelar',
@@ -65,15 +95,34 @@ cerrarImagen() {
         },
         {
           text: 'Aceptar',
-          handler: (data) => {
-            if (data.nombreTecnico.trim()) {
-              // this.reportesService.actualizarEstadoReporte(
-              //   this.reporteId,
-              //   EstadoReporte.ACEPTADO,
-              //   data.nombreTecnico
-              // );
-              // this.cargarReporte();
-              // this.mostrarToast('Reporte aceptado correctamente', 'success');
+          handler: async () => {
+            try {
+              const historialData = {
+                accion: 'aceptacion',
+                descripcion: 'Reporte aceptado para revisión',
+                fechaAccion: new Date().toISOString(),
+                user: reporte.usuario.documentId,
+                reporte: reporte.documentId
+              };
+
+              // Primero intenta crear el historial
+              const historialResult = await this.api.historialAcep(historialData, this.token);
+
+              // Si se creó correctamente el historial, actualiza el reporte
+              if (historialResult) {
+                await this.api.actualizarestado(
+                  reporte.documentId!,
+                  'aceptado',
+                  this.usuario.documentId,
+                  this.token
+                );
+                this.mostrarToast('Reporte aceptado correctamente', 'success');
+              } else {
+                this.mostrarToast('Error al crear historial. No se aceptó el reporte.', 'danger');
+              }
+            } catch (error) {
+              console.error('Error al aceptar reporte:', error);
+              this.mostrarToast('Error inesperado. Intenta de nuevo.', 'danger');
             }
           }
         }
@@ -82,20 +131,44 @@ cerrarImagen() {
     await alert.present();
   }
 
-  async marcarEnProceso() {
-    // this.reportesService.actualizarEstadoReporte(
-    //   this.reporteId,
-    //   EstadoReporte.EN_PROCESO
-    // );
-    // this.cargarReporte();
-    // await this.mostrarToast('Reporte marcado como en proceso', 'warning');
-  }
+async marcarEnProceso() {
+  try {
+    const historialData = {
+      accion: 'inicio_trabajo',
+      descripcion: 'Técnico trabajando en la solución',
+      fechaAccion: new Date().toISOString(),
+      user: this.usuario.documentId,
+      usuario: this.usuario.nombre,
+      reporte: this.reporte.documentId
+    };
 
-  async marcarResuelto() {
+    // Crear historial
+    const historialResult = await this.api.historialAcep(historialData, this.token);
+
+    if (historialResult) {
+      // Actualizar estado del reporte a 'en_proceso'
+      await this.api.enProceso(
+        this.reporte.documentId,
+        'en_proceso',
+        this.token
+      );
+      this.cargarReporte();
+      await this.mostrarToast('Reporte marcado como en proceso', 'warning');
+    } else {
+      this.mostrarToast('Error al crear historial. No se actualizó el reporte.', 'danger');
+    }
+  } catch (error) {
+    console.error('Error al marcar en proceso:', error);
+    this.mostrarToast('Error inesperado. Intenta de nuevo.', 'danger');
+  }
+}
+
+
+    async marcarResuelto() {
     const alert = await this.alertController.create({
       header: 'Marcar como Resuelto',
       message: 'Describa la solución aplicada:',
-      inputs: [
+     inputs: [
         {
           name: 'solucion',
           type: 'textarea',
@@ -109,16 +182,36 @@ cerrarImagen() {
         },
         {
           text: 'Marcar Resuelto',
-          handler: (data) => {
-            if (data.solucion.trim()) {
-              // this.reportesService.actualizarEstadoReporte(
-              //   this.reporteId,
-              //   EstadoReporte.RESUELTO,
-              //   undefined,
-              //   data.solucion
-              // );
-              // this.cargarReporte();
-              // this.mostrarToast('Reporte marcado como resuelto', 'success');
+          handler: async (data) => {
+            try {
+              const historialData = {
+                accion: 'aceptacion',
+                descripcion: 'Reporte aceptado para revisión',
+                fechaAccion: new Date().toISOString(),
+                user: this.usuario.documentId,
+                usuario:this.usuario.nombre,
+                reporte: this.reporte.documentId
+              };
+
+              // Primero intenta crear el historial
+              const historialResult = await this.api.historialAcep(historialData, this.token);
+
+              // Si se creó correctamente el historial, actualiza el reporte
+              if (historialResult) {
+                await this.api.resuelto(
+                this.reporte.documentId,
+                'resuelto',
+                data.solucion,
+                this.token
+              );
+              this.cargarReporte();
+              this.mostrarToast('Reporte marcado como resuelto', 'success');
+              } else {
+                this.mostrarToast('Error al crear historial. No se aceptó el reporte.', 'danger');
+              }
+            } catch (error) {
+              console.error('Error al aceptar reporte:', error);
+              this.mostrarToast('Error inesperado. Intenta de nuevo.', 'danger');
             }
           }
         }
@@ -167,24 +260,24 @@ cerrarImagen() {
     await alert.present();
   }
 
-  getEstadoTexto(estado: EstadoReporte): string {
+  getEstadoTexto(estado: any): string {
     switch (estado) {
-      case EstadoReporte.PENDIENTE: return 'Pendiente';
-      case EstadoReporte.ACEPTADO: return 'Aceptado';
-      case EstadoReporte.EN_PROCESO: return 'En Proceso';
-      case EstadoReporte.RESUELTO: return 'Resuelto';
-      case EstadoReporte.CERRADO: return 'Cerrado';
-      default: return estado;
+    case 'pendiente': return 'Pendiente';
+    case 'aceptado': return 'Aceptado';
+    case 'en_proceso': return 'En Proceso';
+    case 'resuelto': return 'Resuelto';
+    case 'cerrado': return 'Cerrado';
+    default: return estado;
     }
   }
 
-  getEstadoColor(estado: EstadoReporte): string {
+  getEstadoColor(estado: any): string {
     switch (estado) {
-      case EstadoReporte.PENDIENTE: return 'warning';
-      case EstadoReporte.ACEPTADO: return 'primary';
-      case EstadoReporte.EN_PROCESO: return 'secondary';
-      case EstadoReporte.RESUELTO: return 'success';
-      case EstadoReporte.CERRADO: return 'medium';
+      case 'pendiente': return 'warning';
+      case 'aceptado': return 'primary';
+      case 'en_proceso': return 'secondary';
+      case 'en_proceso': return 'success';
+      case 'cerrado': return 'medium';
       default: return 'medium';
     }
   }
@@ -204,22 +297,22 @@ cerrarImagen() {
   }
 
   puedeAceptar(): boolean {
-    return this.esTecnico && this.reporte?.estado === EstadoReporte.PENDIENTE;
+    return this.esTecnico && this.reporte?.estado === 'pendiente';
   }
 
   puedeMarcarEnProceso(): boolean {
-    return this.esTecnico && this.reporte?.estado === EstadoReporte.ACEPTADO;
+    return this.esTecnico && this.reporte?.estado === 'aceptado';
   }
 
   puedeMarcarResuelto(): boolean {
-    return this.esTecnico && this.reporte?.estado === EstadoReporte.EN_PROCESO;
+    return this.esTecnico && this.reporte?.estado === 'en_proceso';
   }
 
   puedeFirmar(): boolean {
-    return !this.esTecnico && this.reporte?.estado === EstadoReporte.RESUELTO;
+    return !this.usuario.role.name && this.reporte?.estado === 'resuelto';
   }
 
   puedeImprimir(): boolean {
-    return this.reporte?.estado === EstadoReporte.CERRADO;
+    return this.reporte?.estado === 'cerrado';
   }
 }

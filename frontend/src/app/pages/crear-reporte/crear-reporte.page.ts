@@ -27,7 +27,6 @@ export class CrearReportePage implements OnInit {
     accion: 'creacion',
     descripcion: 'Creacion de reporte',
     usuario: '',
-    
     fechaAccion: new Date().toISOString(),
     user: '',
     //aqui va el document id del reporte recien creado
@@ -47,7 +46,7 @@ export class CrearReportePage implements OnInit {
     private storage: Storage
   ) {
   }
-  usuario:  any ;
+  usuario: any;
 
   async ngOnInit() {
     await this.storage.create();
@@ -62,7 +61,7 @@ export class CrearReportePage implements OnInit {
 
     if (tokenData?.token && tokenData?.user) {
       this.usuario = tokenData.user;
-      console.log('este es el usuario',this.usuario)
+      console.log('este es el usuario', this.usuario)
 
 
 
@@ -98,31 +97,22 @@ export class CrearReportePage implements OnInit {
 
   previewImage: (string | ArrayBuffer | null)[] = [];
 
-  seleccionarFoto(event: any) {
-    const archivos: FileList = event.target.files;
+seleccionarFoto(event: any) {
+  const archivos: FileList = event.target.files;
 
-    if (archivos && archivos.length > 0) {
-      const nuevosArchivos = Array.from(archivos);
-
-      // Asegura que el arreglo exista antes de usar push
-      if (!this.reporte.archivosAdjuntos) {
-        this.reporte.archivosAdjuntos = [];
-      }
-
-      this.reporte.archivosAdjuntos.push(...nuevosArchivos);
-
-      for (const archivo of nuevosArchivos) {
-        const reader = new FileReader();
-        reader.onload = () => {
-          if (!this.previewImage) {
-            this.previewImage = [];
-          }
-          this.previewImage.push(reader.result);
-        };
-        reader.readAsDataURL(archivo);
-      }
+  if (archivos && archivos.length > 0) {
+    this.previewImage = [];
+    for (const archivo of Array.from(archivos)) {
+      const reader = new FileReader();
+      reader.onload = () => {
+        this.previewImage.push(reader.result);
+      };
+      reader.readAsDataURL(archivo);
     }
+    this.reporte.archivosAdjuntos = Array.from(archivos);
   }
+}
+
 
 
 
@@ -137,38 +127,84 @@ export class CrearReportePage implements OnInit {
 
 
 
-  async enviarReporte() {
-    console.log(this.reporte)
-    if (!this.validarFormulario()) return;
-
-    const loading = await this.mostrarLoading();
-
-    try {
-      // 1. Crear reporte con archivos (subida + creación)
-      const reporteCreado = await this.api.crearReporteConArchivos(this.reporte, this.token);
-      const reporteId = reporteCreado.data.id;
-
-      // 2. Crear historial con la relación al reporte recién creado
-      const historialData = {
-        accion: 'creacion',
-        descripcion: 'Creación de reporte',
-        usuario: this.historial.usuario,
-        fechaAccion: new Date().toISOString(),
-        user: this.historial.user,
-        reporte: reporteId
-      };
-
-      await this.api.crearHistorial(historialData, this.token);
-
-      await loading.dismiss();
-      await this.mostrarToast('Reporte y historial creados correctamente', 'success');
-      this.limpiarFormulario();
-
-    } catch (error) {
-      await loading.dismiss();
-      await this.mostrarAlerta('Error', 'No se pudo enviar el reporte. Intente nuevamente.');
-    }
+async enviarReporte() {
+  if (!this.validarFormulario()) {
+    return;
   }
+
+  const loading = await this.mostrarLoading();
+  let reporteCreado = false;
+  let historialCreado = false;
+  let reporteId: string | null = null;
+
+  try {
+    // Guarda el ID del usuario antes por si se sobrescribe después
+    const usuarioId = this.usuario.documentId;
+    const usuarioNombre = this.usuario.nombre;
+
+    // Preparar datos del reporte
+    const data = {
+      edificio: this.reporte.edificio,
+      aula: this.reporte.aula,
+      numeroReporte: Math.floor(Math.random() * 9999) + 1,
+      fechaIncidente: this.reporte.fechaIncidente,
+      tipoProblema: this.reporte.tipoProblema,
+      descripcionDetallada: this.reporte.descripcionDetallada,
+      equipoAfectado: this.reporte.equipoAfectado,
+      archivosAdjuntos: this.reporte.archivosAdjuntos,
+      usuario: usuarioId
+    };
+
+    console.log('Datos enviados:', data);
+
+    // Crear reporte con archivos
+    const resReporte = await this.api.crearReporteConArchivos(data, this.token);
+    reporteId = resReporte.reporteId;
+
+    if (!reporteId) {
+      throw new Error('No se recibió un ID de reporte válido');
+    }
+
+    reporteCreado = true;
+
+    // Crear historial
+    const historialData = {
+      accion: 'creacion',
+      descripcion: 'Reporte creado por el usuario',
+      fechaAccion: new Date().toISOString(),
+      user: usuarioId,
+      usuario: usuarioNombre,
+      reporte: reporteId
+    };
+
+    await this.api.historialAcep(historialData, this.token);
+    historialCreado = true;
+
+    // Éxito
+    await loading.dismiss();
+    await this.mostrarToast('Reporte y historial creados correctamente', 'success');
+    this.limpiarFormulario();
+
+  } catch (error) {
+    await loading.dismiss();
+
+    let mensajeError = 'No se pudo completar la operación';
+
+    if (error instanceof Error) {
+      console.error('Error:', error);
+      mensajeError = error.message;
+    }
+
+    if (reporteCreado && !historialCreado) {
+      mensajeError = 'El reporte se creó pero falló el historial. El sistema puede mostrar inconsistencia.';
+    }
+
+    await this.mostrarAlerta('Error', mensajeError);
+  }
+}
+
+
+
 
 
   private validarFormulario(): boolean {

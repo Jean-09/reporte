@@ -1,7 +1,7 @@
 <ion-header [translucent]="true">
   <ion-toolbar>
     <ion-buttons slot="start">
-      <ion-back-button defaultHref="/reportes" text="Volver"></ion-back-button>
+      <ion-back-button></ion-back-button>
     </ion-buttons>
     <ion-title>Gestión de Técnicos</ion-title>
   </ion-toolbar>
@@ -18,8 +18,14 @@
   <ion-card>
     <ion-card-content>
       <div style="text-align: center;">
-        <ion-icon name="person-circle" style="font-size: 48px; color: var(--ion-color-primary);"></ion-icon>
-        <h2>{{ tecnicoActual }}</h2>
+
+        <img *ngIf="usuario?.avatar?.url" [src]="'http://localhost:1337' + usuario.avatar.url"
+          style="font-size: 48px; color: var(--ion-color-primary); width: 5%; border-radius: 90px;"
+          [alt]="usuario?.nombre" />
+        <ion-icon *ngIf="!usuario?.avatar?.url" name="person-circle"
+          style="font-size: 48px; color: var(--ion-color-primary);"></ion-icon>
+
+        <h2>{{ usuario?.nombre }}</h2>
         <p>Técnico de Soporte</p>
       </div>
     </ion-card-content>
@@ -38,37 +44,32 @@
       <div *ngFor="let reporte of reportesPendientes" class="reporte-item">
         <ion-item>
           <div slot="start" class="prioridad-indicator">
-            <ion-chip [color]="getPrioridadColor(getPrioridad(reporte.fechaCreacion))" size="small">
-              {{ getPrioridad(reporte.fechaCreacion).toUpperCase() }}
+            <ion-chip [color]="getPrioridadColor(getPrioridad(reporte.createdAt))" size="small">
+              {{ getPrioridad(reporte.createdAt).toUpperCase() }}
             </ion-chip>
-            <p style="font-size: 12px; margin: 2px 0;">{{ getTiempoTranscurrido(reporte.fechaCreacion) }}</p>
+            <p style="font-size: 12px; margin: 2px 0;">{{ getTiempoTranscurrido(reporte.createdAt) }}</p>
           </div>
-          
+
           <ion-label>
-            <h3>Reporte #{{ reporte.id }}</h3>
-            <p><strong>Usuario:</strong> {{ reporte.nombreUsuario }}</p>
-            <p><strong>Departamento:</strong> {{ reporte.edificio }}</p>
-            <p><strong>Tipo:</strong> {{ reporte.tipoProblema }}</p>
-            <p><strong>Descripción:</strong> {{ reporte.descripcionDetallada | slice:0:80 }}...</p>
-            <p><strong>Fecha:</strong> {{ formatearFecha(reporte.fechaCreacion) }}</p>
+            <h3>Reporte #{{ reporte?.id || 'N/A' }}</h3>
+            <p><strong>Usuario:</strong> {{ reporte?.usuario?.nombre || 'No especificado' }}</p>
+            <p><strong>Departamento:</strong> {{ reporte?.edificio?.nombre || 'No especificado' }}</p>
+            <p><strong>Tipo:</strong> {{ reporte?.tipoProblema || 'No especificado' }}</p>
+            <p><strong>Descripción:</strong> {{ (reporte?.descripcionDetallada | slice:0:80) || 'Sin descripción' }}...
+            </p>
+            <p><strong>Fecha:</strong> {{ reporte?.fechaCreacion ? formatearFecha(reporte.fechaCreacion) : 'No
+              especificada' }}</p>
           </ion-label>
 
-          <div slot="end" class="acciones-botones">
-            <ion-button 
-              fill="solid" 
-              color="success" 
-              size="small"
-              (click)="aceptarReporte(reporte)">
+          <div slot="end" class="acciones-botones" *ngIf="usuario?.role?.name === 'Técnico'">
+            <ion-button fill="solid" color="success" size="small" (click)="aceptarReporte(reporte)">
               <ion-icon name="checkmark" slot="icon-only"></ion-icon>
             </ion-button>
-            <ion-button 
-              fill="solid" 
-              color="danger" 
-              size="small"
-              (click)="rechazarReporte(reporte)">
+            <ion-button fill="solid" color="danger" size="small" (click)="rechazarReporte(reporte)">
               <ion-icon name="close" slot="icon-only"></ion-icon>
             </ion-button>
           </div>
+
         </ion-item>
       </div>
 
@@ -81,7 +82,7 @@
   </ion-card>
 
   <!-- Reportes Aceptados -->
-  <ion-card>
+  <ion-card *ngIf="usuario?.role?.name === 'Técnico'">
     <ion-card-header>
       <ion-card-title>
         <ion-icon name="construct"></ion-icon>
@@ -91,19 +92,31 @@
     </ion-card-header>
     <ion-card-content>
       <div *ngFor="let reporte of reportesAceptados" class="reporte-item">
-        <ion-item [routerLink]="['/detalle-reporte', reporte.id]">
-          <div slot="start" class="estado-indicator">
-            <ion-chip 
-              [color]="reporte.estado === 'aceptado' ? 'primary' : 'warning'" 
-              size="small">
-              {{ reporte.estado === 'aceptado' ? 'ACEPTADO' : 'EN PROCESO' }}
-            </ion-chip>
-          </div>
-          
+        <ion-item (click)="reporteDetalle(reporte)">
+<div slot="start" class="estado-indicator">
+  <ion-chip size="small" [color]="
+    reporte.estado === 'pendiente' ? 'medium' :
+    reporte.estado === 'aceptado' ? 'primary' :
+    reporte.estado === 'en_proceso' ? 'warning' :
+    reporte.estado === 'resuelto' ? 'success' :
+    reporte.estado === 'cerrado' ? 'dark' : 'light'
+  ">
+    {{
+      reporte.estado === 'pendiente' ? 'PENDIENTE' :
+      reporte.estado === 'aceptado' ? 'ACEPTADO' :
+      reporte.estado === 'en_proceso' ? 'EN PROCESO' :
+      reporte.estado === 'resuelto' ? 'RESUELTO' :
+      reporte.estado === 'cerrado' ? 'CERRADO' :
+      'DESCONOCIDO'
+    }}
+  </ion-chip>
+</div>
+
+
           <ion-label>
             <h3>Reporte #{{ reporte.id }}</h3>
-            <p><strong>Usuario:</strong> {{ reporte.nombreUsuario }}</p>
-            <p><strong>Departamento:</strong> {{ reporte.edificio }}</p>
+            <p><strong>Usuario:</strong> {{ reporte.usuario.nombre }}</p>
+            <p><strong>Edificio:</strong> {{ reporte.edificio.nombre }}</p>
             <p><strong>Tipo:</strong> {{ reporte.tipoProblema }}</p>
             <p><strong>Aceptado:</strong> {{ formatearFecha(reporte.fechaAceptacion!) }}</p>
           </ion-label>
@@ -121,7 +134,7 @@
   </ion-card>
 
   <!-- Estadísticas Rápidas -->
-  <ion-card>
+  <ion-card *ngIf="usuario?.role?.name === 'Técnico'">
     <ion-card-header>
       <ion-card-title>
         <ion-icon name="analytics"></ion-icon>

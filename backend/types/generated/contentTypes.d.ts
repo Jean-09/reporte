@@ -494,7 +494,7 @@ export interface ApiHistorialAccioneHistorialAccione
       'manyToOne',
       'plugin::users-permissions.user'
     >;
-    usuario: Schema.Attribute.String &
+    usuario: Schema.Attribute.Text &
       Schema.Attribute.Required &
       Schema.Attribute.SetMinMaxLength<{
         maxLength: 100;
@@ -525,7 +525,7 @@ export interface ApiReporteReporte extends Struct.CollectionTypeSchema {
     descripcionDetallada: Schema.Attribute.Text & Schema.Attribute.Required;
     edificio: Schema.Attribute.Relation<'manyToOne', 'api::edificio.edificio'>;
     emailUsuario: Schema.Attribute.Email;
-    equipoAfectado: Schema.Attribute.String & Schema.Attribute.Required;
+    equipoAfectado: Schema.Attribute.Text & Schema.Attribute.Required;
     estado: Schema.Attribute.Enumeration<
       ['pendiente', 'aceptado', 'en_proceso', 'resuelto', 'cerrado']
     > &
@@ -544,10 +544,13 @@ export interface ApiReporteReporte extends Struct.CollectionTypeSchema {
       'api::reporte.reporte'
     > &
       Schema.Attribute.Private;
-    numeroReporte: Schema.Attribute.String &
-      Schema.Attribute.SetMinMaxLength<{
-        maxLength: 10;
-      }>;
+    numeroReporte: Schema.Attribute.BigInteger &
+      Schema.Attribute.SetMinMax<
+        {
+          max: '9999';
+        },
+        string
+      >;
     observacionesTecnico: Schema.Attribute.Text;
     publishedAt: Schema.Attribute.DateTime;
     rectorEdificio: Schema.Attribute.String &
@@ -555,10 +558,10 @@ export interface ApiReporteReporte extends Struct.CollectionTypeSchema {
         maxLength: 100;
       }>;
     solucionAplicada: Schema.Attribute.Text;
-    tecnicoAsignado: Schema.Attribute.String &
-      Schema.Attribute.SetMinMaxLength<{
-        maxLength: 100;
-      }>;
+    tecnico_asignado: Schema.Attribute.Relation<
+      'manyToOne',
+      'plugin::users-permissions.user'
+    >;
     tipoProblema: Schema.Attribute.Text;
     updatedAt: Schema.Attribute.DateTime;
     updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
@@ -1072,6 +1075,7 @@ export interface PluginUsersPermissionsUser
       'manyToOne',
       'plugin::users-permissions.role'
     >;
+    tecnico: Schema.Attribute.Relation<'oneToMany', 'api::reporte.reporte'>;
     updatedAt: Schema.Attribute.DateTime;
     updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
       Schema.Attribute.Private;

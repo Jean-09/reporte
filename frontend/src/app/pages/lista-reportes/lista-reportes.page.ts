@@ -1,6 +1,5 @@
 import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
-import { Reporte, EstadoReporte } from '../../models/reporte.model';
 import { Storage } from '@ionic/storage-angular';
 import { ApiService } from 'src/app/service/api.service';
 
@@ -56,6 +55,8 @@ export class ListaReportesPage implements OnInit {
     }
   }
 
+  filtro:any[]=[];
+
   cargarReportes() {
   const roleName = this.usuario.role?.name;
 
@@ -86,32 +87,38 @@ export class ListaReportesPage implements OnInit {
 }
 
 
-  aplicarFiltro() {
+aplicarFiltro() {
   if (this.filtroEstado === 'todos') {
     this.reportesFiltrados = this.reportes;
   } else {
-    const filtrados = this.reportes.filter(r => r.estado === this.filtroEstado);
-    this.reportesFiltrados = filtrados.length > 0 ? filtrados : this.reportes;
+    const filtrados = this.reportes.filter(r => 
+      (r.estado || '').toLowerCase().replace(/\s/g, '_') === this.filtroEstado
+    );
+    console.log('Reportes filtrados:', filtrados);
+    this.reportesFiltrados = filtrados;
   }
 }
+
 
 
   onFiltroChange() {
     this.aplicarFiltro();
   }
 
-  getEstadoTexto(estado: EstadoReporte): string {
-    switch (estado) {
-      case EstadoReporte.PENDIENTE: return 'Pendiente';
-      case EstadoReporte.ACEPTADO: return 'Aceptado';
-      case EstadoReporte.EN_PROCESO: return 'En Proceso';
-      case EstadoReporte.RESUELTO: return 'Resuelto';
-      case EstadoReporte.CERRADO: return 'Cerrado';
-      default: return estado;
-    }
+getEstadoTexto(estado: string): string {
+   console.log('Este es el estado', estado)
+  switch (estado) {
+    case 'pendiente': return 'Pendiente';
+    case 'aceptado': return 'Aceptado';
+    case 'en_proceso': return 'En Proceso';
+    case 'resuelto': return 'Resuelto';
+    case 'cerrado': return 'Cerrado';
+    default: return estado || 'No especificado';
   }
+}
 
-  getEstadoClase(estado: EstadoReporte): string {
+
+  getEstadoClase(estado: any): string {
     return `status-badge status-${estado}`;
   }
 

@@ -31,12 +31,12 @@
     </ion-card-content>
   </ion-card>
   <!-- Modal -->
-          <div class="modal-imagen" *ngIf="imagenSeleccionada" (click)="cerrarImagen()">
-            <img [src]="imagenSeleccionada" class="imagen-grande" />
-          </div>
+  <div class="modal-imagen" *ngIf="imagenSeleccionada" (click)="cerrarImagen()">
+    <img [src]="imagenSeleccionada" class="imagen-grande" />
+  </div>
   <!-- Información del Usuario -->
   <ion-card>
-    
+
     <ion-card-header>
       <ion-card-title>
         <ion-icon name="person"></ion-icon>
@@ -94,7 +94,7 @@
               class="imagen-miniatura" (click)="mostrarImagen(a)" alt="adjunto" />
           </div>
 
-          
+
 
         </ion-label>
       </ion-item>
@@ -102,7 +102,7 @@
   </ion-card>
 
   <!-- Información del Técnico (si está asignado) -->
-  <ion-card *ngIf="reporte.tecnicoAsignado">
+  <ion-card *ngIf="reporte.tecnico_asignado">
     <ion-card-header>
       <ion-card-title>
         <ion-icon name="construct"></ion-icon>
@@ -113,15 +113,16 @@
       <ion-item>
         <ion-label>
           <h3>Técnico Asignado</h3>
-          <p>{{ reporte.tecnicoAsignado }}</p>
+          <p>{{ reporte.tecnico_asignado.nombre }}</p>
         </ion-label>
       </ion-item>
-      <ion-item *ngIf="reporte.fechaAceptacion">
+      <ion-item *ngIf="reporte.historial_acciones[0]?.fechaAccion">
         <ion-label>
           <h3>Fecha de Aceptación</h3>
-          <p>{{ formatearFecha(reporte.fechaAceptacion) }}</p>
+          <p>{{ formatearFecha(reporte.historial_acciones[0].fechaAccion) }}</p>
         </ion-label>
       </ion-item>
+
       <ion-item *ngIf="reporte.solucionAplicada">
         <ion-label>
           <h3>Solución Aplicada</h3>
@@ -152,8 +153,14 @@
         <ion-item>
           <ion-label>
             <h3>{{ accion.accion }}</h3>
-            <p><strong>Usuario:</strong> {{ accion.usuario }}</p>
-            <p><strong>Fecha:</strong> {{ formatearFecha(accion.fecha) }}</p>
+            <p *ngIf="reporte.tecnico_asignado; else usuarioPorDefecto">
+              <strong>Usuario:</strong> {{ reporte.tecnico_asignado.nombre }}
+            </p>
+            <ng-template #usuarioPorDefecto>
+              <p><strong>Usuario:</strong> {{ reporte.usuario.nombre }}</p>
+            </ng-template>
+
+            <p><strong>Fecha:</strong> {{ formatearFecha(accion.fechaAccion) }}</p>
             <p *ngIf="accion.descripcion">{{ accion.descripcion }}</p>
           </ion-label>
         </ion-item>
@@ -162,7 +169,7 @@
   </ion-card>
 
   <!-- Acciones del Técnico -->
-  <ion-card *ngIf="esTecnico">
+  <ion-card *ngIf="usuario?.role?.name === 'Técnico'">
     <ion-card-header>
       <ion-card-title>
         <ion-icon name="settings"></ion-icon>
@@ -170,11 +177,6 @@
       </ion-card-title>
     </ion-card-header>
     <ion-card-content>
-      <ion-button *ngIf="puedeAceptar()" expand="block" color="primary" (click)="aceptarReporte()">
-        <ion-icon name="checkmark" slot="start"></ion-icon>
-        Aceptar Reporte
-      </ion-button>
-
       <ion-button *ngIf="puedeMarcarEnProceso()" expand="block" color="warning" (click)="marcarEnProceso()">
         <ion-icon name="construct" slot="start"></ion-icon>
         Marcar En Proceso
@@ -188,7 +190,7 @@
   </ion-card>
 
   <!-- Acciones del Usuario -->
-  <ion-card *ngIf="!esTecnico">
+  <ion-card *ngIf="usuario?.role?.name === 'Authenticated'">
     <ion-card-header>
       <ion-card-title>
         <ion-icon name="person"></ion-icon>

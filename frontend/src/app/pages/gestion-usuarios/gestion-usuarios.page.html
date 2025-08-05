@@ -50,7 +50,7 @@
           <ion-label position="stacked">Edificio Asignado</ion-label>
           <ion-select [(ngModel)]="nuevoUsuario.edificio" name="edificio" placeholder="Seleccione el edificio">
             <ion-select-option *ngFor="let edificio of edificios" [value]="edificio">
-              {{ edificio }}
+              {{ edificio.nombre }}
             </ion-select-option>
           </ion-select>
         </ion-item>
@@ -109,7 +109,14 @@
       <ion-card-content>
         <div class="usuario-header">
           <div class="usuario-info">
-            <h3>{{ usuario.nombre }}</h3>
+            <h3>
+              <img
+                [src]="usuario.avatar?.url ? 'http://localhost:1337' + usuario.avatar.url : 'assets/img/default-avatar.png'"
+                alt="Avatar"
+                style="width: 24px; height: 24px; border-radius: 50%; margin-right: 8px; vertical-align: middle;" />
+              {{ usuario.nombre }}
+            </h3>
+
             <p>{{ usuario.email }}</p>
 
           </div>
@@ -133,9 +140,7 @@
             <ion-icon [name]="usuario.activo ? 'pause' : 'play'" slot="icon-only"></ion-icon>
           </ion-button>
 
-          <ion-button fill="clear" size="small" color="danger" (click)="eliminarUsuario(usuario)">
-            <ion-icon name="trash" slot="icon-only"></ion-icon>
-          </ion-button>
+
         </div>
       </ion-card-content>
     </ion-card>

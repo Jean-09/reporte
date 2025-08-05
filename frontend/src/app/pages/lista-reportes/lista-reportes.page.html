@@ -46,16 +46,16 @@
     <ion-card (click)="verDetallesRepo(reporte)">
       <ion-card-header>
         <ion-card-subtitle>
-          <span [class]="getEstadoClase(reporte.estado)">{{ getEstadoTexto(reporte.estado) }}</span>
-          <span style="float: right; color: #666;">Reporte #{{ reporte.numeroReporte}}</span>
+          <span [class]="getEstadoClase(reporte.estado)">{{ getEstadoTexto(reporte.estado || 'No especificado') }}</span>
+          <span style="float: right; color: #666;">Reporte #{{ reporte.numeroReporte || 'No especificado'}}</span>
         </ion-card-subtitle>
-        <ion-card-title> - {{ reporte.edificio.nombre }}</ion-card-title>
+        <ion-card-title> Edificio: {{ reporte.edificio.nombre}}</ion-card-title>
       </ion-card-header>
       <ion-card-content>
-        <p><strong>Tipo:</strong> {{ reporte.tipoProblema }}</p>
-        <p><strong>Descripción:</strong> {{ reporte.descripcionDetallada | slice:0:100 }}{{ reporte.descripcionDetallada.length > 100 ? '...' : '' }}</p>
-        <p><strong>Fecha Creación:</strong> {{ formatearFecha(reporte.createdAt) }}</p>
-        <p *ngIf="reporte.tecnicoAsignado"><strong>Técnico:</strong> {{ reporte.tecnicoAsignado}}</p>
+        <p><strong>Tipo:</strong> {{ reporte.tipoProblema || 'No especificado' }}</p>
+        <p><strong>Descripción:</strong> {{ reporte.descripcionDetallada | slice:0:100  }}{{ reporte.descripcionDetallada.length > 100 ? '...' : '' }}</p>
+        <p><strong>Fecha Creación:</strong> {{ formatearFecha(reporte.createdAt) || 'No especificado' }}</p>
+        <p *ngIf="reporte.tecnicoAsignado"><strong>Técnico:</strong> {{ reporte.tecnicoAsignado }}</p>
       </ion-card-content>
     </ion-card>
   </div>

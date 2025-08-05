@@ -32,12 +32,11 @@ const routes: Routes = [
     path: 'detalle-reporte',
     loadChildren: () => import('./pages/detalle-reporte/detalle-reporte.module').then(m => m.DetalleReportePageModule),
   },
-  // {
-  //   path: 'gestion-tecnicos',
-  //   loadChildren: () => import('./pages/gestion-tecnicos/gestion-tecnicos.module').then(m => m.GestionTecnicosPageModule),
-  //   canActivate: [AuthGuard, RoleGuard],
-  //   data: { roles: ['tecnico', 'administrador'] }
-  // },
+  {
+    path: 'gestion-tecnicos',
+    loadChildren: () => import('./pages/gestion-tecnicos/gestion-tecnicos.module').then(m => m.GestionTecnicosPageModule),
+    data: { roles: ['tecnico', 'administrador'] }
+  },
   {
     path: 'gestion-usuarios',
     loadChildren: () => import('./pages/gestion-usuarios/gestion-usuarios.module').then(m => m.GestionUsuariosPageModule),

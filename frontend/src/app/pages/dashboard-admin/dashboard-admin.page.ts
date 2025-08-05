@@ -1,9 +1,8 @@
 import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
-import { Usuario } from '../../models/auth.model';
-import { EstadoReporte } from '../../models/reporte.model';
 import { Storage } from '@ionic/storage-angular';
 import { ApiService } from 'src/app/service/api.service';
+import { Usuario } from '../../models/auth.model';
 
 @Component({
   selector: 'app-dashboard-admin',
@@ -12,7 +11,7 @@ import { ApiService } from 'src/app/service/api.service';
   standalone: false
 })
 export class DashboardAdminPage implements OnInit {
-  usuario: Usuario | null = null;
+  usuario: Usuario| null = null;
   reportes: any[] = [];
   estadisticas = {
     totalReportes: 0,
@@ -71,30 +70,30 @@ export class DashboardAdminPage implements OnInit {
 
   calcularEstadisticas() {
     this.estadisticas.totalReportes = this.reportes.length;
-    this.estadisticas.pendientes = this.reportes.filter(r => r.estado === EstadoReporte.PENDIENTE).length;
-    this.estadisticas.enProceso = this.reportes.filter(r => r.estado === EstadoReporte.EN_PROCESO).length;
-    this.estadisticas.resueltos = this.reportes.filter(r => r.estado === EstadoReporte.RESUELTO).length;
-    this.estadisticas.cerrados = this.reportes.filter(r => r.estado === EstadoReporte.CERRADO).length;
+    this.estadisticas.pendientes = this.reportes.filter(r => r.estado === 'pendiente').length;
+    this.estadisticas.enProceso = this.reportes.filter(r => r.estado === 'en_proceso').length;
+    this.estadisticas.resueltos = this.reportes.filter(r => r.estado === 'resuelto').length;
+    this.estadisticas.cerrados = this.reportes.filter(r => r.estado === 'resuelto').length;
   }
 
-  getEstadoTexto(estado: EstadoReporte): string {
+  getEstadoTexto(estado: any): string {
     switch (estado) {
-      case EstadoReporte.PENDIENTE: return 'Pendiente';
-      case EstadoReporte.ACEPTADO: return 'Aceptado';
-      case EstadoReporte.EN_PROCESO: return 'En Proceso';
-      case EstadoReporte.RESUELTO: return 'Resuelto';
-      case EstadoReporte.CERRADO: return 'Cerrado';
+      case estado.PENDIENTE: return 'Pendiente';
+      case estado.ACEPTADO: return 'Aceptado';
+      case estado.EN_PROCESO: return 'En Proceso';
+      case estado.RESUELTO: return 'Resuelto';
+      case estado.CERRADO: return 'Cerrado';
       default: return estado;
     }
   }
 
-  getEstadoColor(estado: EstadoReporte): string {
+  getEstadoColor(estado: any): string {
     switch (estado) {
-      case EstadoReporte.PENDIENTE: return 'warning';
-      case EstadoReporte.ACEPTADO: return 'primary';
-      case EstadoReporte.EN_PROCESO: return 'secondary';
-      case EstadoReporte.RESUELTO: return 'success';
-      case EstadoReporte.CERRADO: return 'medium';
+      case estado.PENDIENTE: return 'warning';
+      case estado.ACEPTADO: return 'primary';
+      case estado.EN_PROCESO: return 'secondary';
+      case estado.RESUELTO: return 'success';
+      case estado.CERRADO: return 'medium';
       default: return 'medium';
     }
   }

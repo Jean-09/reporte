@@ -9,6 +9,4 @@ Frontend/.env
 backend/node_modules/
 backend/.cache/
 backend/build/
-backend/public/uploads/
 backend/.tmp/
-backend/.env

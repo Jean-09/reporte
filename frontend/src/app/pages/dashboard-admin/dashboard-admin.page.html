@@ -17,8 +17,8 @@
 
       <img *ngIf="$any(usuario)?.avatar?.url" [src]="'http://localhost:1337' + $any(usuario).avatar.url" [alt]="usuario?.nombre" class="user-avatar"/>
       <div class="user-details">
-        <h2>¡Bienvenido, {{ usuario?.nombre }}!</h2>
-        <p>{{ usuario?.departamento?.nombre }} - Administrador</p>
+        <h2>¡Bienvenido, {{ usuario?.nombre || 'No especificado' }}!</h2>
+        <p>{{ usuario?.departamento?.nombre || 'No especificado' }} - Administrador</p>
       </div>
     </div>
   </div>
@@ -34,7 +34,7 @@
               <ion-icon name="document-text"></ion-icon>
             </div>
             <div class="stat-info">
-              <h4 style="color: black;">{{ estadisticas.totalReportes }}</h4>
+              <h4 style="color: black;">{{ estadisticas.totalReportes || 'No especificado' }}</h4>
               <p>Total Reportes</p>
             </div>
           </div>
@@ -45,7 +45,7 @@
               <ion-icon name="time"></ion-icon>
             </div>
             <div class="stat-info">
-              <h4 style="color: black;">{{ estadisticas.pendientes }}</h4>
+              <h4 style="color: black;">{{ estadisticas.pendientes || 'No especificado' }}</h4>
               <p>Pendientes</p>
             </div>
           </div>
@@ -56,7 +56,7 @@
               <ion-icon name="construct"></ion-icon>
             </div>
             <div class="stat-info">
-              <h4 style="color: black;">{{ estadisticas.enProceso }}</h4>
+              <h4 style="color: black;">{{ estadisticas.enProceso || 'No especificado' }}</h4>
               <p>En Proceso</p>
             </div>
           </div>
@@ -67,7 +67,7 @@
               <ion-icon name="checkmark-circle"></ion-icon>
             </div>
             <div class="stat-info">
-              <h4 style="color: black;">{{ estadisticas.cerrados }}</h4>
+              <h4 style="color: black;">{{ estadisticas.cerrados || 'No especificado' }}</h4>
               <p>Cerrados</p>
             </div>
           </div>
@@ -149,7 +149,7 @@
         <div class="report-header">
           <div class="report-info">
             <h4 style="color: black;">Reporte #{{ reporte.numeroReporte }}</h4>
-            <p>{{ reporte.usuario.username }} - {{ reporte.edificio.nombre }}</p>
+            <p>{{ reporte.usuario.username || 'No especificado' }} - {{ reporte.edificio.nombre || 'No especificado' }}</p>
           </div>
           <ion-chip [color]="getEstadoColor(reporte.estado)" class="status-chip">
             {{ getEstadoTexto(reporte.estado) }}
@@ -157,7 +157,7 @@
         </div>
         <p class="report-description" style="color: black;">{{ reporte.descripcionDetallada | slice:0:100 }}...</p>
         <div class="report-footer">
-          <span class="report-date">{{ formatearFecha(reporte.fechaIncidente) }}</span>
+          <span class="report-date">{{ formatearFecha(reporte.fechaIncidente) || 'No especificado' }}</span>
           <ion-button fill="clear" size="small" (click)="verDetallesRepo(reporte)">
             Ver Detalle
             <ion-icon name="arrow-forward" slot="end" ></ion-icon>

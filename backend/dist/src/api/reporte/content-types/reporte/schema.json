@@ -17,10 +17,6 @@
             "target": "api::edificio.edificio",
             "inversedBy": "reportes"
         },
-        "numeroReporte": {
-            "type": "string",
-            "maxLength": 10
-        },
         "emailUsuario": {
             "type": "email"
         },
@@ -40,7 +36,7 @@
             "required": true
         },
         "equipoAfectado": {
-            "type": "string",
+            "type": "text",
             "required": true
         },
         "estado": {
@@ -54,10 +50,6 @@
                 "resuelto",
                 "cerrado"
             ]
-        },
-        "tecnicoAsignado": {
-            "type": "string",
-            "maxLength": 100
         },
         "rectorEdificio": {
             "type": "string",
@@ -95,6 +87,16 @@
             "relation": "oneToMany",
             "target": "api::historial-accione.historial-accione",
             "mappedBy": "reporte"
+        },
+        "tecnico_asignado": {
+            "type": "relation",
+            "relation": "manyToOne",
+            "target": "plugin::users-permissions.user",
+            "inversedBy": "tecnico"
+        },
+        "numeroReporte": {
+            "type": "biginteger",
+            "max": "9999"
         }
     }
 }

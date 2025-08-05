@@ -86,6 +86,7 @@ export class GestionUsuariosPage implements OnInit {
   cargarUsuarios() {
     this.api.getUsers(this.token).then((res) => {
       this.usuarios = res.data;
+      console.log(this.usuarios)
       this.aplicarFiltros();
     }).catch((error) => {
       this.mostrarAlerta('Error', 'Intenta iniciar sesión nuevamente');
@@ -203,17 +204,25 @@ export class GestionUsuariosPage implements OnInit {
     await alert.present();
   }
 
-  async toggleEstadoUsuario(usuario: any) {
-    try {
-      const usuarioActualizado = { ...usuario, activo: !usuario.activo };
-      await this.api.putUserStatus(usuario!, usuarioActualizado, this.token);
+async toggleEstadoUsuario(usuario: any) {
+  console.log('esto se manda', usuario);
 
-      const estado = usuarioActualizado.activo ? 'activado' : 'desactivado';
-      await this.mostrarToast(`Usuario ${estado} correctamente`, 'success');
-    } catch (error) {
-      await this.mostrarToast('Error al cambiar estado del usuario', 'danger');
-    }
+  try {
+    const nuevoEstado = !usuario.activo;
+
+    // Llama al API con solo el campo activo actualizado
+    await this.api.putUserStatus(usuario.id, { activo: nuevoEstado }, this.token);
+
+    // Actualiza el estado en el objeto original (opcional para reflejar en la UI)
+    usuario.activo = nuevoEstado;
+
+    const estado = nuevoEstado ? 'activado' : 'desactivado';
+    await this.mostrarToast(`Usuario ${estado} correctamente`, 'success');
+  } catch (error) {
+    await this.mostrarToast('Error al cambiar estado del usuario', 'danger');
   }
+}
+
 
   private validarFormulario(): boolean {
     if (!this.nuevoUsuario.nombre?.trim()) {
@@ -242,23 +251,20 @@ export class GestionUsuariosPage implements OnInit {
 
   getRolTexto(rol: string): string {
     switch (rol) {
-      case 'alumno': return 'Alumno';
-      case 'docente': return 'Docente';
-      case 'tecnico': return 'Técnico';
-      case 'rector': return 'Rector';
-      case 'administrador': return 'Administrador';
+      case 'Authenticated': return 'Usuario';
+      case 'Técnico': return 'Técnico';
+      case 'Administrador': return 'Administrador';
       default: return rol;
     }
   }
 
   getRolColor(rol: string): string {
     switch (rol) {
-      case 'administrador': return 'danger';
-      case 'rector': return 'warning';
-      case 'tecnico': return 'primary';
-      case 'docente': return 'secondary';
-      case 'alumno': return 'success';
+      case 'Administrador': return 'danger';
+      case 'Authenticated': return 'success';
+      case 'Técnico': return 'primary';
       default: return 'medium';
+      
     }
   }
 

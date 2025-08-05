@@ -107,6 +107,12 @@
       "relation": "oneToOne",
       "target": "api::edificio.edificio",
       "mappedBy": "user"
+    },
+    "tecnico": {
+      "type": "relation",
+      "relation": "oneToMany",
+      "target": "api::reporte.reporte",
+      "mappedBy": "tecnico_asignado"
     }
   }
 }
